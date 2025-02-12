@@ -1,107 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_auth_ui/supabase_auth_ui.dart';
+
+final supabase = Supabase.instance.client;
+final activeSession = supabase.auth.currentSession;
 
 class Login extends StatefulWidget {
+  const Login({super.key});
+
   @override
-  _LoginState createState() => _LoginState();
+  State<Login> createState() => _LoginState();
 }
 
 class _LoginState extends State<Login> {
   @override
+  void initState() {
+    super.initState();
+    if (activeSession == null) {
+      Navigator.pushNamed(context, '/auth');
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      appBar: AppBar(title: const Text('Home')),
+      body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              "NINEBIBIFOOD",
-              style: TextStyle(
-                fontWeight: FontWeight.bold, // ทำให้ข้อความหนาขึ้น
-                fontSize: 50, // ขนาดของฟอนต์
-                color: Colors.orange, // สีของข้อความ
-                letterSpacing: 2, // ระยะห่างระหว่างตัวอักษร
-                shadows: [
-                  Shadow(
-                    blurRadius: 10, // ความเบลอของเงา
-                    color: Colors.black.withOpacity(0.5), // สีของเงา
-                    offset: Offset(4, 4), // ตำแหน่งของเงา
-                  ),
-                ],
-              ),
+              'You are home - ${activeSession?.user.id}',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
-            SizedBox(height: 40),
-            Container(
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12), // มุมมน
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 8,
-                    offset: Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    "Login",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 24,
-                      color: Colors.black,
-                    ),
-                  ),
-                  SizedBox(height: 20),
-
-                  // email
-                  TextField(
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                  const SizedBox(height: 16),
-
-                  // pass
-                  TextField(
-                    decoration: const InputDecoration(
-                      labelText: 'Password',
-                      border: OutlineInputBorder(),
-                    ),
-                    obscureText: true,
-                  ),
-                  const SizedBox(height: 24),
-
-                  // ปุ่ม Login
-                  ElevatedButton(
-                    onPressed: () {},
-                    child: const Text('Login'),
-                  ),
-
-                  SizedBox(height: 20),
-
-                  // Text signup nakub
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pushNamed(context, '/signUp');
-                    },
-                    child: Text(
-                      "Don't have an account? Sign up",
-                      style: TextStyle(
-                        color: Colors.blue,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 16,
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            const SizedBox(height: 24.0),
+            ElevatedButton(
+              onPressed: () async {
+                await supabase.auth.signOut();
+                Navigator.pushNamed(context, '/');
+              },
+              child: const Text('Sign out'),
             ),
           ],
         ),
