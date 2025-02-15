@@ -13,7 +13,7 @@ class AuthScreen extends StatelessWidget {
           Column(
             children: [
               const Text(
-                'Supabase Auth UI',
+                'Login',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
@@ -23,9 +23,9 @@ class AuthScreen extends StatelessWidget {
               SupaEmailAuth(
                 redirectTo: "io.supabase.flutter://",
                 onSignInComplete: (res) =>
-                    Navigator.pushNamed(context, '/home'),
+                    Navigator.pushNamed(context, '/login'),
                 onSignUpComplete: (res) =>
-                    Navigator.pushNamed(context, '/home'),
+                    Navigator.pushNamed(context, '/login'),
                 onError: (error) => SnackBar(content: Text(error.toString())),
               ),
             ],

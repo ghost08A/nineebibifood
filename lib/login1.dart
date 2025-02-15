@@ -23,16 +23,16 @@ class _Login1State extends State<Login1> {
                 letterSpacing: 2, // ระยะห่างระหว่างตัวอักษร
                 shadows: [
                   Shadow(
-                    blurRadius: 10, // ความเบลอของเงา
+                    blurRadius: 5, // ความเบลอของเงา
                     color: Colors.black.withOpacity(0.5), // สีของเงา
-                    offset: Offset(4, 4), // ตำแหน่งของเงา
+                    offset: Offset(2, 2), // ตำแหน่งของเงา
                   ),
                 ],
               ),
             ),
             SizedBox(height: 40),
             Container(
-              padding: EdgeInsets.all(16),
+              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 32),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12), // มุมมน
@@ -51,11 +51,11 @@ class _Login1State extends State<Login1> {
                     "Login",
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
-                      fontSize: 24,
+                      fontSize: 30,
                       color: Colors.black,
                     ),
                   ),
-                  SizedBox(height: 20),
+                  SizedBox(height: 30),
 
                   // email
                   TextField(
@@ -65,7 +65,7 @@ class _Login1State extends State<Login1> {
                     ),
                     keyboardType: TextInputType.emailAddress,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
 
                   // pass
                   TextField(
@@ -78,14 +78,18 @@ class _Login1State extends State<Login1> {
                   const SizedBox(height: 24),
 
                   // ปุ่ม Login
-                  ElevatedButton(
-                    onPressed: () {},
-                    child: const Text('Login'),
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 30, vertical: 16), // ขนาดของปุ่ม
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12), // มุมมน
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {},
+                      child: const Text('Login',
+                          style: TextStyle(color: Colors.white, fontSize: 18)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
                   ),
@@ -96,14 +100,27 @@ class _Login1State extends State<Login1> {
                     onTap: () {
                       Navigator.pushNamed(context, '/signUp');
                     },
-                    child: Text(
-                      "Don't have an account? Sign up",
-                      style: TextStyle(
-                        color: Colors.blue,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 16,
-                        decoration: TextDecoration.underline,
-                      ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Don't have an account? ",
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Text(
+                          "Sign up",
+                          style: TextStyle(
+                            color: Colors.blue,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 16,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],

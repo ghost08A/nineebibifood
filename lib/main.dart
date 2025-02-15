@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
         ),
         initialRoute: '/',
         routes: {
-          '/': (context) => SplashScreen(),
+          '/splashScreen': (context) => SplashScreen(),
           '/auth': (context) => AuthScreen(),
           '/login': (context) => Login(),
           '/homenine': (context) => Homenine(),
@@ -44,7 +44,7 @@ class MyApp extends StatelessWidget {
           '/store_list': (context) => StoreList(),
           '/detail': (context) => Detail(),
           '/payment': (context) => Payment(),
-          '/login1': (context) => Login1(),
+          '/': (context) => Login1(),
           '/signUp': (context) => Signup(),
         });
   }
