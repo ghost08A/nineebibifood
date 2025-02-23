@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
           appBarTheme: AppBarTheme(color: Colors.blue),
           useMaterial3: true,
         ),
-        initialRoute: '/adminHome',
+        initialRoute: '/',
         routes: {
           '/splashScreen': (context) => SplashScreen(),
           '/auth': (context) => AuthScreen(),
