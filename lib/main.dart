@@ -4,6 +4,8 @@ import 'package:nineebibifood/detail.dart';
 import 'package:nineebibifood/homenine.dart';
 import 'package:nineebibifood/login.dart';
 import 'package:nineebibifood/login1.dart';
+import 'package:nineebibifood/market_list.dart';
+import 'package:nineebibifood/menu1.dart';
 import 'package:nineebibifood/orderDetail.dart';
 import 'package:nineebibifood/payment.dart';
 import 'package:nineebibifood/restaurant_list.dart';
@@ -49,7 +51,6 @@ class MyApp extends StatelessWidget {
           '/orderDetail': (context) => Orderdetail(),
           '/': (context) => Login1(),
           '/signUp': (context) => Signup(),
-          '/adminHome': (context) => AdminHome(),
         });
   }
 }
