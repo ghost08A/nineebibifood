@@ -1,27 +1,27 @@
 import 'models/product.dart';
 
-class CatalogProduct {
+class CatalogMarket {
   static final items = [
     Product(
         id: 0,
-        title: 'KFC',
+        title: 'Top Super Market',
         desc:
             'ไก่ทอดเคนทักกี (อังกฤษ: Kentucky Fried Chicken) เป็นร้านอาหารจานด่วนมีหลายสาขาทั่วโลกที่เน้นอาหารประเภทไก่ทอด',
         imageUrl:
-            "https://tse4.mm.bing.net/th?id=OIP.TmskcDaOoPVGmD6ddsWAXwHaHa&pid=Api"),
+            "https://jiakitchen.com/wp-content/uploads/2016/09/tops-logo-1.png"),
     Product(
         id: 1,
-        title: 'McDonalds',
+        title: 'Big C',
         desc:
             'อาหารหลักที่ขายทั่วไปคือ แฮมเบอร์เกอร์ ชีสเบอร์เกอร์ เฟรนช์ฟรายส์ ไก่ทอด สลัด ชุดอาหารเช้า ชุดอาหารสำหรับเด็กชื่อ แฮปปี้มีล และของหวานอีกหลายชนิด',
         imageUrl:
-            "https://logos-world.net/wp-content/uploads/2020/04/McDonalds-Logo.png"),
+            "https://tse2.mm.bing.net/th?id=OIP.73XeDBdXeZgl-1jsTMeeeAHaKp&w=474&h=474&c=7"),
     Product(
         id: 1,
-        title: 'The Pizza Company',
+        title: 'Lotus',
         desc:
-            'The Pizza Company เป็นที่รู้จักในเรื่อง พิซซ่าหน้าหนา หน้าจัดเต็ม ที่มีชีสเยิ้มและเครื่องแน่น ต่างจากแบรนด์พิซซ่าอื่นที่เน้นแป้งมากกว่า',
+            'อาหารหลักที่ขายทั่วไปคือ แฮมเบอร์เกอร์ ชีสเบอร์เกอร์ เฟรนช์ฟรายส์ ไก่ทอด สลัด ชุดอาหารเช้า ชุดอาหารสำหรับเด็กชื่อ แฮปปี้มีล และของหวานอีกหลายชนิด',
         imageUrl:
-            "https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/The_Pizza_Company_Logo_%282023%29.svg/1200px-The_Pizza_Company_Logo_%282023%29.svg.png"),
+            "https://play-lh.googleusercontent.com/8ZzZZ3jXAWzQC7gx90F_9w6dm1pftGrsDvwcUbSn3S89kIt9so6zRdXQX_ALKHnXBg=w240-h480-rw")
   ];
 }

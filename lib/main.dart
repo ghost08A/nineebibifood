@@ -4,6 +4,8 @@ import 'package:nineebibifood/detail.dart';
 import 'package:nineebibifood/homenine.dart';
 import 'package:nineebibifood/login.dart';
 import 'package:nineebibifood/login1.dart';
+import 'package:nineebibifood/market_list.dart';
+import 'package:nineebibifood/menu1.dart';
 import 'package:nineebibifood/payment.dart';
 import 'package:nineebibifood/restaurant_list.dart';
 import 'package:nineebibifood/signUp.dart';
@@ -34,7 +36,7 @@ class MyApp extends StatelessWidget {
           appBarTheme: AppBarTheme(color: Colors.blue),
           useMaterial3: true,
         ),
-        initialRoute: '/',
+        initialRoute: '/homenine',
         routes: {
           '/splashScreen': (context) => SplashScreen(),
           '/auth': (context) => AuthScreen(),
@@ -46,6 +48,8 @@ class MyApp extends StatelessWidget {
           '/payment': (context) => Payment(),
           '/': (context) => Login1(),
           '/signUp': (context) => Signup(),
+          '/market_list': (context) => MarketList(),
+          '/menu1': (context) => Menu1(),
         });
   }
 }

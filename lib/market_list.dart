@@ -1,40 +1,40 @@
 import 'package:flutter/material.dart';
-import 'catalog_product.dart';
+import 'catalog_market.dart';
 
-class RestaurantList extends StatefulWidget {
-  const RestaurantList({super.key});
+class MarketList extends StatefulWidget {
+  const MarketList({super.key});
 
   @override
-  State<RestaurantList> createState() => _RestaurantListState();
+  State<MarketList> createState() => _MarketListState();
 }
 
-class _RestaurantListState extends State<RestaurantList> {
+class _MarketListState extends State<MarketList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         title: const Text(
-          "Restaurants",
+          "Market",
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
       ),
       body: ListView.separated(
-        itemCount: CatalogProduct.items.length,
+        itemCount: CatalogMarket.items.length,
         itemBuilder: (context, index) => ListTile(
           onTap: () {
             Navigator.pushNamed(
               context,
               '/menu1',
-              arguments: CatalogProduct.items[index],
+              arguments: CatalogMarket.items[index],
             );
           },
           leading: Image.network(
-            CatalogProduct.items[index].imageUrl,
+            CatalogMarket.items[index].imageUrl,
             width: 86,
           ),
-          title: Text(CatalogProduct.items[index].title),
-          subtitle: Text(CatalogProduct.items[index].desc),
+          title: Text(CatalogMarket.items[index].title),
+          subtitle: Text(CatalogMarket.items[index].desc),
         ),
         separatorBuilder: (context, index) => const Divider(),
       ),
