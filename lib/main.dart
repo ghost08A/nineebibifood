@@ -40,6 +40,8 @@ class MyApp extends StatelessWidget {
         ),
         initialRoute: '/',
         routes: {
+          '/menu1': (context) => Menu1(),
+          '/market_list': (context) => MarketList(),
           '/splashScreen': (context) => SplashScreen(),
           '/auth': (context) => AuthScreen(),
           '/login': (context) => Login(),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'orderDetail.dart';
 
 class Menu1 extends StatefulWidget {
   const Menu1({super.key});
@@ -132,6 +133,7 @@ class _Menu1State extends State<Menu1> {
             ),
             ElevatedButton(
               onPressed: () {
+                Navigator.pushNamed(context, '/orderDetail');
                 // เมื่อกดปุ่ม "ชำระเงิน" จะแสดง SnackBar แจ้งเตือน
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
