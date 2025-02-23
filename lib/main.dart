@@ -4,6 +4,7 @@ import 'package:nineebibifood/detail.dart';
 import 'package:nineebibifood/homenine.dart';
 import 'package:nineebibifood/login.dart';
 import 'package:nineebibifood/login1.dart';
+import 'package:nineebibifood/orderDetail.dart';
 import 'package:nineebibifood/payment.dart';
 import 'package:nineebibifood/restaurant_list.dart';
 import 'package:nineebibifood/signUp.dart';
@@ -11,6 +12,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:nineebibifood/splash_screen.dart';
 import 'package:nineebibifood/store_list.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:nineebibifood/admin/adminHome.dart';
 
 void main() async {
   await dotenv.load(fileName: ".env");
@@ -34,7 +36,7 @@ class MyApp extends StatelessWidget {
           appBarTheme: AppBarTheme(color: Colors.blue),
           useMaterial3: true,
         ),
-        initialRoute: '/',
+        initialRoute: '/adminHome',
         routes: {
           '/splashScreen': (context) => SplashScreen(),
           '/auth': (context) => AuthScreen(),
@@ -44,8 +46,10 @@ class MyApp extends StatelessWidget {
           '/store_list': (context) => StoreList(),
           '/detail': (context) => Detail(),
           '/payment': (context) => Payment(),
+          '/orderDetail': (context) => Orderdetail(),
           '/': (context) => Login1(),
           '/signUp': (context) => Signup(),
+          '/adminHome': (context) => AdminHome(),
         });
   }
 }
