@@ -317,7 +317,7 @@ class _OrderdetailState extends State<Orderdetail> {
                 SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: () {
-                    // Add your onPressed code here!
+                    Navigator.pushNamed(context, '/payment');
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue, // เปลี่ยนสีปุ่มเป็นฟ้า

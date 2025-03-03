@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:nineebibifood/app_controller.dart'; // ✅ Import AppController
 
 class Login1 extends StatefulWidget {
   @override
@@ -6,6 +9,58 @@ class Login1 extends StatefulWidget {
 }
 
 class _Login1State extends State<Login1> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _loading = false;
+
+  final _supabase = Supabase.instance.client;
+  final appController = Get.find<AppController>(); // ✅ ดึง AppController มาใช้
+
+  Future<void> _signIn() async {
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      _showSnackbar('❌ Please enter email and password.');
+      return;
+    }
+    setState(() => _loading = true);
+
+    try {
+      // ✅ ล็อกอินด้วยอีเมล & รหัสผ่าน
+      final AuthResponse response = await _supabase.auth.signInWithPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
+
+      if (response.session != null) {
+        final userId = response.user?.id;
+        final email = response.user?.email;
+        print("✅ Login Successful: User ID = $userId, Email = $email");
+
+        // ✅ อัปเดต userId ใน `AppController`
+        if (userId != null) {
+          appController.setUserId(userId);
+        }
+
+        _showSnackbar('✅ Login Successful!');
+
+        // ✅ เปลี่ยนหน้าไป `Homenine` โดยใช้ `GetX`
+        Get.offNamed('/homenine');
+      } else {
+        _showSnackbar('❌ Invalid email or password.');
+      }
+    } on AuthException catch (e) {
+      _showSnackbar('❌ Error: ${e.message}');
+    } finally {
+      setState(() => _loading = false);
+    }
+  }
+
+  void _showSnackbar(String message) {
+    Get.snackbar('Login Status', message,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.black54,
+        colorText: Colors.white);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -17,15 +72,15 @@ class _Login1State extends State<Login1> {
             Text(
               "NINEBIBIFOOD",
               style: TextStyle(
-                fontWeight: FontWeight.bold, // ทำให้ข้อความหนาขึ้น
-                fontSize: 50, // ขนาดของฟอนต์
-                color: Colors.orange, // สีของข้อความ
-                letterSpacing: 2, // ระยะห่างระหว่างตัวอักษร
+                fontWeight: FontWeight.bold,
+                fontSize: 50,
+                color: Colors.orange,
+                letterSpacing: 2,
                 shadows: [
                   Shadow(
-                    blurRadius: 5, // ความเบลอของเงา
-                    color: Colors.black.withOpacity(0.5), // สีของเงา
-                    offset: Offset(2, 2), // ตำแหน่งของเงา
+                    blurRadius: 5,
+                    color: Colors.black.withOpacity(0.5),
+                    offset: Offset(2, 2),
                   ),
                 ],
               ),
@@ -35,7 +90,7 @@ class _Login1State extends State<Login1> {
               padding: EdgeInsets.symmetric(horizontal: 24, vertical: 32),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12), // มุมมน
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black26,
@@ -57,8 +112,9 @@ class _Login1State extends State<Login1> {
                   ),
                   SizedBox(height: 30),
 
-                  // email
+                  // ✅ Email
                   TextField(
+                    controller: _emailController,
                     decoration: const InputDecoration(
                       labelText: 'Email',
                       border: OutlineInputBorder(),
@@ -67,8 +123,9 @@ class _Login1State extends State<Login1> {
                   ),
                   const SizedBox(height: 20),
 
-                  // pass
+                  // ✅ Password
                   TextField(
+                    controller: _passwordController,
                     decoration: const InputDecoration(
                       labelText: 'Password',
                       border: OutlineInputBorder(),
@@ -77,15 +134,16 @@ class _Login1State extends State<Login1> {
                   ),
                   const SizedBox(height: 24),
 
-                  // ปุ่ม Login
+                  // ✅ ปุ่ม Login
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/homenine');
-                      },
-                      child: const Text('Login',
-                          style: TextStyle(color: Colors.white, fontSize: 18)),
+                      onPressed: _loading ? null : _signIn,
+                      child: _loading
+                          ? CircularProgressIndicator(color: Colors.white)
+                          : const Text('Login',
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 18)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue,
                         padding: EdgeInsets.symmetric(vertical: 16),
@@ -97,10 +155,10 @@ class _Login1State extends State<Login1> {
                   ),
                   SizedBox(height: 20),
 
-                  // Text signup nakub
+                  // ✅ ไปหน้า Sign Up
                   GestureDetector(
                     onTap: () {
-                      Navigator.pushNamed(context, '/signUp');
+                      Get.toNamed('/signUp'); // ✅ ใช้ GetX
                     },
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,

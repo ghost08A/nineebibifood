@@ -9,7 +9,6 @@ class Signup extends StatefulWidget {
 }
 
 class _SignupState extends State<Signup> {
-  @override
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -19,40 +18,72 @@ class _SignupState extends State<Signup> {
       TextEditingController();
 
   bool _loading = false;
+  final _supabase = Supabase.instance.client;
 
   Future<void> _signUp() async {
     if (_passwordController.text != _confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('❌ Passwords do not match!')),
-      );
+      _showSnackbar('❌ Passwords do not match!');
+      return;
+    }
+
+    if (!_validateEmail(_emailController.text)) {
+      _showSnackbar('❌ Invalid email format!');
+      return;
+    }
+
+    if (!_validatePassword(_passwordController.text)) {
+      _showSnackbar('❌ Password must be at least 6 characters!');
       return;
     }
 
     setState(() => _loading = true);
 
     try {
-      final response = await Supabase.instance.client.auth.signUp(
+      // ✅ สมัครสมาชิกกับ Supabase Authentication
+      final AuthResponse response = await _supabase.auth.signUp(
         email: _emailController.text,
         password: _passwordController.text,
-        data: {
-          'username': _usernameController.text,
+      );
+
+      final userId = response.user?.id; // ดึง user ID
+      print("User ID: $userId");
+
+      if (userId != null) {
+        // ✅ บันทึกข้อมูลลงตาราง `users`
+        final data = {
+          'id': userId, // ใช้ user ID เป็น primary key
+          'email': _emailController.text,
+          'name': _usernameController.text,
           'address': _addressController.text,
           'phone': _phoneController.text,
-        },
-      );
+        };
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('✅ Sign Up Successful! Check your email.')),
-      );
+        final insertResponse = await _supabase.from('user').insert(data);
 
-      Navigator.pop(context); // กลับไปหน้า Login
+        _showSnackbar('✅ Sign Up Successful! Check your email.');
+        Navigator.pop(context); // กลับไปหน้า login
+      } else {
+        _showSnackbar('❌ Sign Up failed. Please try again.');
+      }
     } on AuthException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('❌ Error: ${e.message}')),
-      );
+      _showSnackbar('❌ Error: ${e.message}');
     } finally {
       setState(() => _loading = false);
     }
+  }
+
+  void _showSnackbar(String message) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  bool _validateEmail(String email) {
+    return RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+        .hasMatch(email);
+  }
+
+  bool _validatePassword(String password) {
+    return password.length >= 6;
   }
 
   @override
@@ -153,21 +184,18 @@ class _SignupState extends State<Signup> {
 
               // ปุ่ม Sign Up
               SizedBox(
-                width: double.infinity, // ✅ ปรับให้ปุ่มมีขนาดเท่ากับช่องกรอก
+                width: double.infinity,
                 child: ElevatedButton(
-                  onPressed:
-                      _loading ? null : _signUp, // ✅ ป้องกันการกดซ้ำขณะโหลด
+                  onPressed: _loading ? null : _signUp,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
-                    padding:
-                        EdgeInsets.symmetric(vertical: 16), // ✅ ปรับให้ขนาดพอดี
+                    padding: EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                   child: _loading
-                      ? CircularProgressIndicator(
-                          color: Colors.white) // ✅ แสดงสถานะโหลด
+                      ? CircularProgressIndicator(color: Colors.white)
                       : Text('Sign Up',
                           style: TextStyle(color: Colors.white, fontSize: 18)),
                 ),
@@ -178,7 +206,7 @@ class _SignupState extends State<Signup> {
               // ไปหน้า Login
               GestureDetector(
                 onTap: () {
-                  Navigator.pop(context); // กลับไปหน้า Login
+                  Navigator.pop(context);
                 },
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
