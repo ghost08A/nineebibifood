@@ -1,5 +1,8 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:nineebibifood/app_controller.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -21,7 +24,7 @@ class _ProfileState extends State<Profile> {
   @override
   void initState() {
     super.initState();
-    // กำหนดข้อมูลสมมุติให้กับแต่ละ TextField
+    // ข้อมูลตัวอย่าง (ต้องดึงจาก API ถ้าต้องการข้อมูลจริง)
     _emailController.text = 'example@example.com';
     _usernameController.text = 'exampleUser';
     _addressController.text = '123 Main Street, City';
@@ -54,11 +57,11 @@ class _ProfileState extends State<Profile> {
           });
 
           if (index == 0) {
-            Navigator.pushNamed(context, '/homenine');
+            Get.toNamed('/homenine');
           } else if (index == 1) {
-            Navigator.pushNamed(context, '/profile');
+            Get.toNamed('/profile');
           } else if (index == 2) {
-            Navigator.pushNamed(context, '/history');
+            Get.toNamed('/history');
           }
         },
       ),
@@ -66,6 +69,23 @@ class _ProfileState extends State<Profile> {
         title: const Text('Edit Profile'),
         backgroundColor: Colors.blue,
         elevation: 0,
+        actions: [
+          IconButton(
+            onPressed: () async {
+              SharedPreferences prefs = await SharedPreferences.getInstance();
+              await prefs
+                  .remove('token'); // ✅ ลบ Token ออกจาก SharedPreferences
+
+              final appController =
+                  Get.find<AppController>(); // ✅ ดึง AppController
+              appController.setToken(null); // ✅ ล้างค่า Token
+              print("🔴 Token removed from SharedPreferences & AppController");
+
+              Get.offAllNamed('/login'); // ✅ กลับไปหน้า Login
+            },
+            icon: const Icon(Icons.logout),
+          )
+        ],
       ),
       body: Container(
         decoration: const BoxDecoration(
@@ -86,37 +106,19 @@ class _ProfileState extends State<Profile> {
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Form(
-                  key: _formKey, // กำหนด key สำหรับ Form
+                  key: _formKey,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // รูปโปรไฟล์แบบวงกลมพร้อมปุ่มเปลี่ยนรูป
-                      Stack(
-                        children: [
-                          CircleAvatar(
-                            radius: 50,
-                            backgroundColor: Colors.grey[300],
-                            backgroundImage: const NetworkImage(
-                                'https://via.placeholder.com/150'),
-                          ),
-                          Positioned(
-                            bottom: 0,
-                            right: 0,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.deepPurple,
-                                shape: BoxShape.circle,
-                              ),
-                              child: IconButton(
-                                icon: const Icon(Icons.camera_alt,
-                                    color: Colors.white),
-                                onPressed: () {
-                                  // เพิ่ม logic ในการเปลี่ยนรูปโปรไฟล์ได้ที่นี่
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
+                      // ✅ เปลี่ยนเป็น Icon Profile ไม่มีปุ่มแก้ไข
+                      const CircleAvatar(
+                        radius: 50,
+                        backgroundColor: Colors.grey,
+                        child: Icon(
+                          Icons.person,
+                          size: 60,
+                          color: Colors.white,
+                        ),
                       ),
                       const SizedBox(height: 20),
                       buildTextField(
@@ -158,14 +160,14 @@ class _ProfileState extends State<Profile> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            backgroundColor: Colors.deepPurple,
+                            backgroundColor: Colors.blue,
                           ),
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
-                              // เพิ่ม logic ในการบันทึกข้อมูลโปรไฟล์ได้ที่นี่
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                    content: Text('Profile updated')),
+                                    content: Text(
+                                        '✅ Profile updated successfully!')),
                               );
                             }
                           },
@@ -207,7 +209,7 @@ class _ProfileState extends State<Profile> {
           borderRadius: BorderRadius.circular(8),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.deepPurple),
+          borderSide: const BorderSide(color: Colors.blue),
           borderRadius: BorderRadius.circular(8),
         ),
       ),

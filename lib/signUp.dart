@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class Signup extends StatefulWidget {
   const Signup({super.key});
@@ -12,13 +14,12 @@ class _SignupState extends State<Signup> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _addressController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
 
   bool _loading = false;
-  final _supabase = Supabase.instance.client;
 
   Future<void> _signUp() async {
     if (_passwordController.text != _confirmPasswordController.text) {
@@ -38,35 +39,36 @@ class _SignupState extends State<Signup> {
 
     setState(() => _loading = true);
 
+    final url = Uri.parse("http://192.168.2.163:3000/api/auth/sign_in");
+
+    final Map<String, dynamic> userData = {
+      "name": _usernameController.text.trim(),
+      "email": _emailController.text.trim(),
+      "address": _addressController.text.trim(),
+      "phone": _phoneController.text.trim(),
+      "password": _passwordController.text,
+    };
+
     try {
-      // ✅ สมัครสมาชิกกับ Supabase Authentication
-      final AuthResponse response = await _supabase.auth.signUp(
-        email: _emailController.text,
-        password: _passwordController.text,
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(userData),
       );
 
-      final userId = response.user?.id; // ดึง user ID
-      print("User ID: $userId");
+      print("📌 API Response: ${response.body}");
 
-      if (userId != null) {
-        // ✅ บันทึกข้อมูลลงตาราง `users`
-        final data = {
-          'id': userId, // ใช้ user ID เป็น primary key
-          'email': _emailController.text,
-          'name': _usernameController.text,
-          'address': _addressController.text,
-          'phone': _phoneController.text,
-        };
-
-        final insertResponse = await _supabase.from('user').insert(data);
-
-        _showSnackbar('✅ Sign Up Successful! Check your email.');
-        Navigator.pop(context); // กลับไปหน้า login
+      if (response.statusCode == 201) {
+        _showSnackbar('✅ Sign Up Successful! Please log in.');
+        Get.offNamed('/login'); // ✅ กลับไปหน้า Login
       } else {
-        _showSnackbar('❌ Sign Up failed. Please try again.');
+        final errorMessage =
+            jsonDecode(response.body)['message'] ?? 'Sign Up Failed!';
+        _showSnackbar('❌ Error: $errorMessage');
       }
-    } on AuthException catch (e) {
-      _showSnackbar('❌ Error: ${e.message}');
+    } catch (error) {
+      print("❌ Error signing up: $error");
+      _showSnackbar('❌ Failed to connect to server.');
     } finally {
       setState(() => _loading = false);
     }
@@ -118,7 +120,7 @@ class _SignupState extends State<Signup> {
               ),
               SizedBox(height: 24),
 
-              // Gmail
+              // Email
               TextField(
                 controller: _emailController,
                 decoration: InputDecoration(
@@ -206,7 +208,7 @@ class _SignupState extends State<Signup> {
               // ไปหน้า Login
               GestureDetector(
                 onTap: () {
-                  Navigator.pop(context);
+                  Get.offNamed('/login');
                 },
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,

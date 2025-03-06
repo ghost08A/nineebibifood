@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:nineebibifood/app_controller.dart'; // ✅ Import AppController
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:nineebibifood/app_controller.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class Login1 extends StatefulWidget {
   @override
@@ -13,8 +15,7 @@ class _Login1State extends State<Login1> {
   final TextEditingController _passwordController = TextEditingController();
   bool _loading = false;
 
-  final _supabase = Supabase.instance.client;
-  final appController = Get.find<AppController>(); // ✅ ดึง AppController มาใช้
+  final appController = Get.find<AppController>(); // ✅ ใช้ GetX Controller
 
   Future<void> _signIn() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
@@ -24,21 +25,28 @@ class _Login1State extends State<Login1> {
     setState(() => _loading = true);
 
     try {
-      // ✅ ล็อกอินด้วยอีเมล & รหัสผ่าน
-      final AuthResponse response = await _supabase.auth.signInWithPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
+      // ✅ ส่งข้อมูลไปที่ API
+      final response = await http.post(
+        Uri.parse('http://192.168.2.163:3000/api/auth/login'),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "email": _emailController.text.trim(),
+          "password": _passwordController.text,
+        }),
       );
 
-      if (response.session != null) {
-        final userId = response.user?.id;
-        final email = response.user?.email;
-        print("✅ Login Successful: User ID = $userId, Email = $email");
+      print("📌 API Response: ${response.body}");
 
-        // ✅ อัปเดต userId ใน `AppController`
-        if (userId != null) {
-          appController.setUserId(userId);
-        }
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && data['token'] != null) {
+        final token = data['token'];
+
+        // ✅ บันทึก Token ลง SharedPreferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', token);
+
+        print("✅ Login Successful: Token = $token");
 
         _showSnackbar('✅ Login Successful!');
 
@@ -47,8 +55,9 @@ class _Login1State extends State<Login1> {
       } else {
         _showSnackbar('❌ Invalid email or password.');
       }
-    } on AuthException catch (e) {
-      _showSnackbar('❌ Error: ${e.message}');
+    } catch (error) {
+      print('Error during login: $error');
+      _showSnackbar('❌ Failed to login.');
     } finally {
       setState(() => _loading = false);
     }
@@ -181,6 +190,22 @@ class _Login1State extends State<Login1> {
                           ),
                         ),
                       ],
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  // ✅ ปุ่ม "Skip" ไปหน้า `Homenine`
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: TextButton(
+                      onPressed: () {
+                        Get.offNamed('/homenine'); // ✅ ข้าม Login
+                      },
+                      child: const Text(
+                        "Continue as Guest", // ✅ เปลี่ยนจาก "Skip" เป็น "Continue as Guest"
+                        style: TextStyle(
+                            fontSize: 16,
+                            color: Color.fromARGB(255, 100, 102, 103)),
+                      ),
                     ),
                   ),
                 ],

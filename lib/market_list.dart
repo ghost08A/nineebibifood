@@ -1,7 +1,8 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class MarketList extends StatefulWidget {
   @override
@@ -10,8 +11,6 @@ class MarketList extends StatefulWidget {
 
 class _MarketListState extends State<MarketList> {
   int _selectedIndex = 0;
-  final SupabaseClient supabase = Supabase.instance.client;
-
   List<dynamic> markets = [];
   bool isLoading = true;
   String _title = 'Market';
@@ -24,41 +23,32 @@ class _MarketListState extends State<MarketList> {
 
   Future<void> fetchMarkets() async {
     try {
-      final userId = Get.arguments['userId'] ?? '';
-      String category = 'Market';
+      final String category =
+          Get.arguments['category'] ?? 'Market'; // ✅ ค่าเริ่มต้นเป็น Market
+      print("🔹 Category: $category");
 
-      // ✅ รับค่าจาก `Get.arguments`
-      if (Get.arguments['category'] == 'Market') {
-        category = Get.arguments['category'] ?? 'Market';
-      } else if (Get.arguments['category'] == 'Food') {
-        category = Get.arguments['category'] ?? 'Food';
-      }
-
-      if (userId.isEmpty) {
-        showSnackbar('❌ User ID is missing.');
-        return;
-      }
-      if (userId.isEmpty) {
-        showSnackbar('❌ User ID is missing.');
-        return;
-      }
-
-      // ✅ อัปเดต `_title` ตาม `category`
       setState(() {
         _title = category == 'Food' ? 'Restaurants' : 'Markets';
       });
 
-      final response =
-          await supabase.from('shop').select().eq('category', category);
+      final response = await http.get(
+          Uri.parse('http://192.168.2.163:3000/api/shop/category/$category'));
 
-      if (response != null && response is List) {
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        print("✅ Data fetched: $data");
+
         setState(() {
-          markets = response;
+          markets = data;
           isLoading = false;
         });
+      } else {
+        print("❌ Error fetching data: ${response.statusCode}");
+        showSnackbar('❌ Failed to fetch market data.');
+        setState(() => isLoading = false);
       }
     } catch (error) {
-      print('Error fetching market data: $error');
+      print('❌ Error: $error');
       showSnackbar('❌ Failed to fetch market data.');
       setState(() => isLoading = false);
     }
@@ -102,17 +92,9 @@ class _MarketListState extends State<MarketList> {
       appBar: AppBar(
         centerTitle: true,
         title: Text(
-          "${_title}",
+          _title,
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
-        actions: [
-          IconButton(
-              onPressed: () async {
-                await supabase.auth.signOut();
-                Get.offAllNamed('/login');
-              },
-              icon: const Icon(Icons.logout))
-        ],
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -124,7 +106,11 @@ class _MarketListState extends State<MarketList> {
                     onTap: () {
                       Get.toNamed(
                         '/menu1',
-                        arguments: {'id': markets[index]['id']},
+                        arguments: {
+                          'id': markets[index]['id'],
+                          'shop_name': utf8.decode(
+                              markets[index]['name'].toString().codeUnits),
+                        },
                       );
                     },
                     leading: Image.network(
@@ -133,8 +119,13 @@ class _MarketListState extends State<MarketList> {
                       errorBuilder: (context, error, stackTrace) =>
                           const Icon(Icons.image_not_supported),
                     ),
-                    title: Text(markets[index]['name'] ?? 'Unknown'),
-                    subtitle: Text(markets[index]['description'] ?? ''),
+                    title: Text(
+                      utf8.decode(markets[index]['name'].toString().codeUnits),
+                    ),
+                    subtitle: Text(
+                      utf8.decode(
+                          markets[index]['description'].toString().codeUnits),
+                    ),
                   ),
                   separatorBuilder: (context, index) => const Divider(),
                 ),

@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 
 class Orderdetail extends StatefulWidget {
   const Orderdetail({super.key});
@@ -9,12 +13,27 @@ class Orderdetail extends StatefulWidget {
 
 class _OrderdetailState extends State<Orderdetail> {
   int _selectedDeliveryOption = 0;
-  int _selectedEcoOption =
-      0; // 0 for "ไม่รับช้อนซ้อมพลาสติก", 1 for "รับช้อนซ้อมพลาสติก"
+  int _selectedEcoOption = 0;
+  List<Map<String, dynamic>> orderItems = [];
+  late String shopName;
 
-  final double standardDeliveryPrice = 5.00;
-  final double expressDeliveryPrice = 10.00;
-  final double nextDayDeliveryPrice = 15.00;
+  @override
+  void initState() {
+    super.initState();
+    // ✅ รับข้อมูลจาก `Get.arguments` ที่ส่งมาจาก `Menu1`
+    final Map<String, dynamic> args = Get.arguments ?? {};
+    orderItems = List<Map<String, dynamic>>.from(args['items'] ?? []);
+    shopName = args['shop_name'];
+
+    setState(() {
+      _selectedDeliveryOption = args['delivery_option'] ?? 0;
+      _selectedEcoOption = args['eco_option'] == true ? 1 : 0;
+    });
+  }
+
+  final double standardDeliveryPrice = 15.00;
+  final double expressDeliveryPrice = 25.00;
+  final double nextDayDeliveryPrice = 40.00;
   final double ecoOptionPrice = 1.00;
 
   double getSelectedDeliveryPrice() {
@@ -40,17 +59,12 @@ class _OrderdetailState extends State<Orderdetail> {
     return deliveryPrice + ecoPrice + itemsPrice;
   }
 
-  final List<Map<String, dynamic>> orderItems = [
-    {'name': 'Item A', 'quantity': 1, 'price': 10.00},
-    {'name': 'Item B', 'quantity': 2, 'price': 20.00},
-    {'name': 'Item C', 'quantity': 1, 'price': 15.00},
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Welcome',
+        // utf8.decode(item['name'].toString().codeUnits)
+        title: Text('$shopName',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
       ),
       body: Column(
@@ -83,7 +97,7 @@ class _OrderdetailState extends State<Orderdetail> {
                           Text(
                             'Delivery Options',
                             style: TextStyle(
-                              fontSize: 18,
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: Colors.black87,
                             ),
@@ -91,17 +105,17 @@ class _OrderdetailState extends State<Orderdetail> {
                           SizedBox(height: 10),
                           ...[
                             {
-                              'label': 'Standard Delivery',
+                              'label': 'ส่งถูกสุด',
                               'price': standardDeliveryPrice,
                               'value': 0
                             },
                             {
-                              'label': 'Express Delivery',
+                              'label': 'ส่งธรรมดา',
                               'price': expressDeliveryPrice,
                               'value': 1
                             },
                             {
-                              'label': 'Next Day Delivery',
+                              'label': 'ส่งเร็วทันใจ',
                               'price': nextDayDeliveryPrice,
                               'value': 2
                             },
@@ -136,13 +150,13 @@ class _OrderdetailState extends State<Orderdetail> {
                                     Text(
                                       option['label'] as String,
                                       style: TextStyle(
-                                        fontSize: 16,
+                                        fontSize: 18,
                                         fontWeight: FontWeight.w500,
                                         color: Colors.black87,
                                       ),
                                     ),
                                     Text(
-                                      '\$${(option['price'] as double).toStringAsFixed(2)}',
+                                      '${(option['price'] as double).toStringAsFixed(2)}',
                                       style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w500,
@@ -179,7 +193,7 @@ class _OrderdetailState extends State<Orderdetail> {
                           Text(
                             'Order Summary',
                             style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
+                                fontSize: 20, fontWeight: FontWeight.bold),
                           ),
                           SizedBox(height: 10),
                           ...orderItems.map((item) => Column(
@@ -188,12 +202,13 @@ class _OrderdetailState extends State<Orderdetail> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
+                                      //utf8.decode(markets[index]['name'].toString().codeUnits),
                                       Text(
-                                        '${item['quantity']} x ${item['name']}',
-                                        style: TextStyle(fontSize: 16),
+                                        '${item['quantity']} x ${utf8.decode(item['name'].toString().codeUnits)}',
+                                        style: TextStyle(fontSize: 18),
                                       ),
                                       Text(
-                                        '\$${(item['price'] as double).toStringAsFixed(2)}',
+                                        '${(item['price'] as double).toStringAsFixed(2)}',
                                         style: TextStyle(fontSize: 16),
                                       ),
                                     ],
@@ -239,11 +254,11 @@ class _OrderdetailState extends State<Orderdetail> {
                             title: ListTile(
                               contentPadding: EdgeInsets.zero,
                               title: Text(
-                                'I would like plastic cutlery.',
-                                style: TextStyle(fontSize: 16),
+                                'ฉันต้องการรับช้อนซ้อมพลาสติก',
+                                style: TextStyle(fontSize: 18),
                               ),
                               trailing: Text(
-                                '\$${ecoOptionPrice.toStringAsFixed(2)}',
+                                '${ecoOptionPrice.toStringAsFixed(2)}',
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -263,8 +278,8 @@ class _OrderdetailState extends State<Orderdetail> {
                           Divider(thickness: 1, color: Colors.grey.shade300),
                           RadioListTile<int>(
                             title: Text(
-                              'I do not need plastic cutlery.',
-                              style: TextStyle(fontSize: 16),
+                              'ฉันไม่ต้องการรับช้อนซ้อมพลาสติก',
+                              style: TextStyle(fontSize: 18),
                             ),
                             value: 0,
                             groupValue: _selectedEcoOption,
@@ -308,7 +323,7 @@ class _OrderdetailState extends State<Orderdetail> {
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      '\$${getTotalPrice().toStringAsFixed(2)}',
+                      '${getTotalPrice().toStringAsFixed(2)}',
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
@@ -317,7 +332,14 @@ class _OrderdetailState extends State<Orderdetail> {
                 SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, '/payment');
+                    Get.toNamed('/payment', arguments: {
+                      "items": orderItems,
+                      "shop_name": shopName,
+                      "delivery_option": _selectedDeliveryOption,
+                      "delivery_price": getSelectedDeliveryPrice(),
+                      "eco_option": _selectedEcoOption == 1,
+                      "total_price": getTotalPrice(),
+                    });
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue, // เปลี่ยนสีปุ่มเป็นฟ้า

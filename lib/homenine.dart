@@ -2,7 +2,10 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nineebibifood/app_controller.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Homenine extends StatefulWidget {
   @override
@@ -11,10 +14,8 @@ class Homenine extends StatefulWidget {
 
 class _HomenineState extends State<Homenine> {
   int _selectedIndex = 0;
-  final _supabase = Supabase.instance.client;
   final appController = Get.find<AppController>(); // ✅ ใช้ GetX Controller
 
-  Map<String, dynamic>? userData;
   List<dynamic> markets = [];
   List<dynamic> restaurants = [];
   bool _loading = true;
@@ -22,42 +23,33 @@ class _HomenineState extends State<Homenine> {
   @override
   void initState() {
     super.initState();
-    _fetchUserData();
+    _fetchShopData();
   }
 
-  Future<void> _fetchUserData() async {
+  Future<void> _fetchShopData() async {
     try {
-      final userId = appController.userId.value;
-      if (userId.isEmpty) {
-        _showSnackbar('❌ User ID is missing.');
-        return;
-      }
+      final response =
+          await http.get(Uri.parse('http://192.168.2.163:3000/api/shop'));
 
-      // ✅ ดึงข้อมูลผู้ใช้
-      final response = await _supabase
-          .from('user')
-          .select('name, email, address, phone')
-          .eq('id', userId)
-          .single();
+      print("API Response: ${response.body}"); // Debug ดูข้อมูล API
 
-      // ✅ ดึงข้อมูลร้านค้าและตลาด
-      final responseMarket =
-          await _supabase.from('shop').select('*').eq('category', 'Market');
+      if (response.statusCode == 200) {
+        final List<dynamic> shops = json.decode(response.body);
 
-      final responseFood =
-          await _supabase.from('shop').select('*').eq('category', 'Food');
-
-      if (response != null) {
+        // แยกข้อมูลร้านอาหารและตลาด
         setState(() {
-          userData = response;
-          markets = responseMarket;
-          restaurants = responseFood;
+          restaurants =
+              shops.where((shop) => shop['category'] == 'Food').toList();
+          markets =
+              shops.where((shop) => shop['category'] == 'Market').toList();
           _loading = false;
         });
+      } else {
+        _showSnackbar('Failed to fetch shop data: ${response.statusCode}');
       }
     } catch (error) {
-      print('Error fetching user data: $error');
-      _showSnackbar('❌ Failed to fetch user data.');
+      print('Error fetching shop data: $error');
+      _showSnackbar('❌ Failed to fetch shop data.');
       setState(() => _loading = false);
     }
   }
@@ -97,21 +89,13 @@ class _HomenineState extends State<Homenine> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         centerTitle: true,
-        title: Text(
-          'Welcome ${userData?['name'] ?? ''}',
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        title: const Text(
+          'Welcome',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
-        actions: [
-          IconButton(
-              onPressed: () async {
-                await _supabase.auth.signOut();
-                Get.offAllNamed('/login');
-              },
-              icon: const Icon(Icons.logout))
-        ],
       ),
       body: _loading
-          ? Center(child: CircularProgressIndicator()) // ✅ แสดงโหลดข้อมูล
+          ? const Center(child: CircularProgressIndicator()) // ✅ แสดงโหลดข้อมูล
           : SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(10.0),
@@ -137,10 +121,8 @@ class _HomenineState extends State<Homenine> {
                                   const SizedBox(height: 5),
                                   IconButton(
                                     onPressed: () {
-                                      Get.toNamed('/market_list', arguments: {
-                                        'userId': appController.userId.value,
-                                        'category': 'Food'
-                                      });
+                                      Get.toNamed('/market_list',
+                                          arguments: {'category': 'Food'});
                                     },
                                     icon: const Icon(Icons.fastfood_rounded),
                                     iconSize: 40,
@@ -166,10 +148,8 @@ class _HomenineState extends State<Homenine> {
                                   const SizedBox(height: 5),
                                   IconButton(
                                     onPressed: () {
-                                      Get.toNamed('/market_list', arguments: {
-                                        'userId': appController.userId.value,
-                                        'category': 'Market'
-                                      });
+                                      Get.toNamed('/market_list',
+                                          arguments: {'category': 'Market'});
                                     },
                                     icon: const Icon(Icons.store),
                                     iconSize: 40,
@@ -215,7 +195,11 @@ class _HomenineState extends State<Homenine> {
         itemBuilder: (context, index) {
           return InkWell(
             onTap: () {
-              Get.toNamed('/menu1', arguments: {'id': items[index]['id']});
+              Get.toNamed('/menu1', arguments: {
+                'id': items[index]['id'],
+                'shop_name': items[index]
+                    ['name'], // ✅ ใช้ `items[index]` โดยตรง
+              });
             },
             child: Container(
               width: 150,
@@ -242,7 +226,7 @@ class _HomenineState extends State<Homenine> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 5.0),
                       child: Text(
-                        items[index]['name'] ?? '',
+                        utf8.decode(items[index]['name'].toString().codeUnits),
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 16),
