@@ -1,5 +1,6 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -32,7 +33,7 @@ class _MarketListState extends State<MarketList> {
       });
 
       final response = await http.get(
-          Uri.parse('http://192.168.2.163:3000/api/shop/category/$category'));
+          Uri.parse('${dotenv.env['BASE_URL']}api/shop/category/$category'));
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);

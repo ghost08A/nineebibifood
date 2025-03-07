@@ -1,5 +1,6 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:nineebibifood/app_controller.dart';
 import 'package:http/http.dart' as http;
@@ -29,7 +30,7 @@ class _HomenineState extends State<Homenine> {
   Future<void> _fetchShopData() async {
     try {
       final response =
-          await http.get(Uri.parse('http://192.168.2.163:3000/api/shop'));
+          await http.get(Uri.parse('${dotenv.env['BASE_URL']}api/shop'));
 
       print("API Response: ${response.body}"); // Debug ดูข้อมูล API
 

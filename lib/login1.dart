@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nineebibifood/app_controller.dart';
@@ -27,7 +28,7 @@ class _Login1State extends State<Login1> {
     try {
       // ✅ ส่งข้อมูลไปที่ API
       final response = await http.post(
-        Uri.parse('http://192.168.2.163:3000/api/auth/login'),
+        Uri.parse('${dotenv.env['BASE_URL']}api/auth/login'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "email": _emailController.text.trim(),

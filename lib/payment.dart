@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:promptpay_qrcode_generate/promptpay_qrcode_generate.dart';
@@ -44,7 +45,7 @@ class _PaymentState extends State<Payment> {
 
   // ✅ ฟังก์ชันบันทึกข้อมูลไปที่ API `/api/history`
   Future<void> _saveOrder() async {
-    final url = Uri.parse("http://192.168.2.163:3000/api/history");
+    final url = Uri.parse("${dotenv.env['BASE_URL']}api/history");
 
     // ✅ ตรวจสอบว่า Token มีค่าหรือไม่
     if (token.isEmpty) {

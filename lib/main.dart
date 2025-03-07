@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nineebibifood/app_controller.dart';
-import 'package:nineebibifood/auth.dart';
 import 'package:nineebibifood/authMiddleware.dart';
 import 'package:nineebibifood/detail.dart';
 import 'package:nineebibifood/history.dart';
@@ -43,7 +42,7 @@ class MyApp extends StatelessWidget {
       getPages: [
         GetPage(name: '/menu1', page: () => Menu1()),
         GetPage(name: '/market_list', page: () => MarketList()),
-        GetPage(name: '/auth', page: () => AuthScreen()),
+
         GetPage(name: '/homenine', page: () => Homenine()), // ✅ เข้าได้เสมอ
         GetPage(name: '/store_list', page: () => StoreList()),
         GetPage(name: '/detail', page: () => Detail()),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -39,7 +40,7 @@ class _SignupState extends State<Signup> {
 
     setState(() => _loading = true);
 
-    final url = Uri.parse("http://192.168.2.163:3000/api/auth/sign_in");
+    final url = Uri.parse("${dotenv.env['BASE_URL']}api/auth/sign_in");
 
     final Map<String, dynamic> userData = {
       "name": _usernameController.text.trim(),
