@@ -3,10 +3,9 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nineebibifood/app_controller.dart';
 import 'package:nineebibifood/authMiddleware.dart';
-import 'package:nineebibifood/detail.dart';
 import 'package:nineebibifood/history.dart';
-import 'package:nineebibifood/homenine.dart';
-import 'package:nineebibifood/login1.dart';
+import 'package:nineebibifood/home.dart';
+import 'package:nineebibifood/login.dart';
 import 'package:nineebibifood/market_list.dart';
 import 'package:nineebibifood/menu1.dart';
 import 'package:nineebibifood/orderDetail.dart';
@@ -14,7 +13,6 @@ import 'package:nineebibifood/payment.dart';
 import 'package:nineebibifood/profile.dart';
 import 'package:nineebibifood/signUp.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:nineebibifood/store_list.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // ✅ ป้องกันปัญหา async ใน main()
@@ -44,8 +42,6 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/market_list', page: () => MarketList()),
 
         GetPage(name: '/homenine', page: () => Homenine()), // ✅ เข้าได้เสมอ
-        GetPage(name: '/store_list', page: () => StoreList()),
-        GetPage(name: '/detail', page: () => Detail()),
         GetPage(
             name: '/payment',
             page: () => Payment(),
