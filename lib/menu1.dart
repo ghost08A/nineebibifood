@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
@@ -36,8 +37,7 @@ class _Menu1State extends State<Menu1> {
     super.initState();
     shopId = Get.arguments['id'] ?? 0; // ✅ รับค่า `id` จาก `homenine`
     //shopName = utf8.decode(args['shop_name'].toString().codeUnits);
-    shopName = utf8.decode(
-        Get.arguments['shop_name'].toString().codeUnits); // ✅ รับชื่อร้าน
+    shopName = Get.arguments['shop_name']; // ✅ รับชื่อร้าน
     if (shopId != 0) {
       _fetchMenuData();
     } else {
@@ -52,32 +52,39 @@ class _Menu1State extends State<Menu1> {
       final response = await http
           .get(Uri.parse('${dotenv.env['BASE_URL']}api/shop/menu/$shopId'));
 
-      print("📌 API Response: ${response.body}"); // ✅ Debug API Response
-
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
 
-        setState(() {
-          _menuItems = data.map((item) {
-            return MenuItem(
-              id: item['id'],
-              name: item['name'],
-              price: double.parse(item['price'].toString()),
-              img: item['img'] ??
-                  'https://via.placeholder.com/150', // ✅ ถ้าไม่มี URL ใช้ Placeholder
-            );
-          }).toList();
-          _loading = false;
-        });
+        // ✅ เช็ค `mounted` ก่อน `setState()`
+        if (mounted) {
+          setState(() {
+            _menuItems = data
+                .map((item) => MenuItem(
+                      id: item['id'],
+                      name: item['name'],
+                      price: double.parse(item['price'].toString()),
+                      img: item['img'],
+                    ))
+                .toList();
+            _loading = false;
+          });
+        }
       } else {
         throw Exception("Failed to load menu");
       }
     } catch (error) {
       print("❌ Error fetching menu: $error");
-      setState(() {
-        _loading = false;
-      });
+
+      // ✅ เช็ค `mounted` ก่อน `setState()`
+      if (mounted) {
+        setState(() => _loading = false);
+      }
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   double get totalPrice {
@@ -88,78 +95,137 @@ class _Menu1State extends State<Menu1> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('$shopName')),
-
-      // ✅ ตรวจสอบว่ากำลังโหลดข้อมูลอยู่หรือไม่
+      appBar: AppBar(title: Text(utf8.decode(shopName.toString().codeUnits))),
       body: _loading
           ? Center(child: CircularProgressIndicator())
           : _menuItems.isEmpty
               ? Center(child: Text("ไม่มีเมนูอาหาร"))
               : Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(10.0),
                   child: GridView.builder(
                     itemCount: _menuItems.length,
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2, // 2 คอลัมน์
-                      mainAxisSpacing: 8.0,
-                      crossAxisSpacing: 8.0,
-                      childAspectRatio: 3 / 4, // กำหนดอัตราส่วนของแต่ละการ์ด
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 10.0,
+                      crossAxisSpacing: 10.0,
+                      childAspectRatio: 3 / 5,
                     ),
                     itemBuilder: (context, index) {
                       final item = _menuItems[index];
-                      return Card(
-                        elevation: 2,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              // ✅ แสดงรูปภาพจาก API
-                              Container(
-                                height: 100,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                  color: Colors.grey[200], // สีพื้นหลังขณะโหลด
-                                  image: DecorationImage(
-                                    image: NetworkImage(item.img),
-                                    fit: BoxFit.cover,
+                      return Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 4,
+                              spreadRadius: 2,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // ✅ ใช้ Stack เพื่อรองรับ Placeholder Loading
+                            Stack(
+                              children: [
+                                Container(
+                                  height: 110,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    color: Colors.grey[200],
+                                  ),
+                                  child: const Center(
+                                    child:
+                                        CircularProgressIndicator(), // 🔄 แสดง Loading ตอนโหลดรูป
                                   ),
                                 ),
-                              ),
-                              const SizedBox(height: 8),
-
-                              /*Expanded( // ✅ ขยายให้เต็มพื้นที่ที่เหลือ
-      child: Text(
-        item.name,
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        overflow: TextOverflow.ellipsis,
-        maxLines: 1,
-      ), */
-                              Expanded(
-                                child: Text(
-                                  utf8.decode(item.name
-                                      .toString()
-                                      .codeUnits), // ✅ ไม่ต้องใช้ utf8.decode() ถ้า API ส่งมาถูกต้อง
-                                  style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 2,
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: Image.network(
+                                    item.img,
+                                    width: double.infinity,
+                                    height: 110,
+                                    fit: BoxFit.cover,
+                                    loadingBuilder:
+                                        (context, child, loadingProgress) {
+                                      if (loadingProgress == null) return child;
+                                      return Container(
+                                        height: 110,
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          color: Colors.grey[200],
+                                        ),
+                                        child: const Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      );
+                                    },
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            Container(
+                                      height: 110,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(10),
+                                        color: Colors.grey[300],
+                                      ),
+                                      child: const Center(
+                                        child: Icon(Icons.broken_image,
+                                            size: 40, color: Colors.grey),
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                  'ราคา: ${item.price.toStringAsFixed(2)} บาท'),
-                              const Spacer(),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
 
-                              // ✅ ปุ่มเพิ่มลดจำนวนอาหาร
-                              Row(
+                            // ✅ ใช้ Expanded ป้องกัน Bottom Overflow
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  // ✅ ป้องกันข้อความล้น
+                                  AutoSizeText(
+                                    utf8.decode(item.name.toString().codeUnits),
+                                    style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 4),
+
+                                  Text(
+                                    'ราคา: ${item.price.toStringAsFixed(2)} บาท',
+                                    style: TextStyle(
+                                        fontSize: 14, color: Colors.grey[700]),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            const SizedBox(height: 8),
+
+                            // ✅ ปรับขนาดปุ่มให้สวยขึ้น
+                            Container(
+                              padding: const EdgeInsets.symmetric(vertical: 6),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   IconButton(
-                                    icon:
-                                        const Icon(Icons.remove_circle_outline),
+                                    icon: const Icon(
+                                        Icons.remove_circle_outline,
+                                        color: Colors.blue),
                                     onPressed: () {
                                       setState(() {
                                         if (item.quantity > 0) {
@@ -168,9 +234,17 @@ class _Menu1State extends State<Menu1> {
                                       });
                                     },
                                   ),
-                                  Text(item.quantity.toString()),
+                                  Text(
+                                    item.quantity.toString(),
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
                                   IconButton(
-                                    icon: const Icon(Icons.add_circle_outline),
+                                    icon: const Icon(Icons.add_circle_outline,
+                                        color: Colors.blue),
                                     onPressed: () {
                                       setState(() {
                                         item.quantity++;
@@ -179,35 +253,37 @@ class _Menu1State extends State<Menu1> {
                                   ),
                                 ],
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       );
                     },
                   ),
                 ),
-
-      // ✅ แถบด้านล่างแสดงยอดรวมและปุ่ม "ชำระเงิน"
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        height: 60,
-        color: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black12, blurRadius: 6, offset: Offset(0, -2)),
+          ],
+        ),
         child: Row(
           children: [
             Expanded(
               child: Text(
                 'รวม: ${totalPrice.toStringAsFixed(2)} บาท',
                 style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
             ElevatedButton(
               onPressed: () {
-                // ✅ ดึงเมนูที่มีจำนวนมากกว่า 0
                 final selectedItems = _menuItems
                     .where((item) => item.quantity > 0)
                     .map((item) => {
-                          "id": item.id, // ✅ ID ของเมนู
+                          "id": item.id,
                           "name": item.name,
                           "price": item.price,
                           "quantity": item.quantity
@@ -221,10 +297,18 @@ class _Menu1State extends State<Menu1> {
                   return;
                 }
 
-                // ✅ ส่งข้อมูลไป `/orderDetail`
                 Get.toNamed('/orderDetail',
                     arguments: {"shop_name": shopName, "items": selectedItems});
               },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
               child: const Text('ชำระเงิน'),
             ),
           ],

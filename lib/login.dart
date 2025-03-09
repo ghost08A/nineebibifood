@@ -16,7 +16,7 @@ class _Login1State extends State<Login1> {
   final TextEditingController _passwordController = TextEditingController();
   bool _loading = false;
 
-  final appController = Get.find<AppController>(); // ✅ ใช้ GetX Controller
+  final appController = Get.find<AppController>();
 
   Future<void> _signIn() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
@@ -26,7 +26,6 @@ class _Login1State extends State<Login1> {
     setState(() => _loading = true);
 
     try {
-      // ✅ ส่งข้อมูลไปที่ API
       final response = await http.post(
         Uri.parse('${dotenv.env['BASE_URL']}api/auth/login'),
         headers: {"Content-Type": "application/json"},
@@ -43,7 +42,6 @@ class _Login1State extends State<Login1> {
       if (response.statusCode == 200 && data['token'] != null) {
         final token = data['token'];
 
-        // ✅ บันทึก Token ลง SharedPreferences
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', token);
 
@@ -51,7 +49,6 @@ class _Login1State extends State<Login1> {
 
         _showSnackbar('✅ Login Successful!');
 
-        // ✅ เปลี่ยนหน้าไป `Homenine` โดยใช้ `GetX`
         Get.offNamed('/homenine');
       } else {
         _showSnackbar('❌ Invalid email or password.');
@@ -74,145 +71,157 @@ class _Login1State extends State<Login1> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              "NINEBIBIFOOD",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 50,
-                color: Colors.orange,
-                letterSpacing: 2,
-                shadows: [
-                  Shadow(
-                    blurRadius: 5,
-                    color: Colors.black.withOpacity(0.5),
-                    offset: Offset(2, 2),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 40),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 8,
-                    offset: Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    "Login",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 30,
-                      color: Colors.black,
-                    ),
-                  ),
-                  SizedBox(height: 30),
-
-                  // ✅ Email
-                  TextField(
-                    controller: _emailController,
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                  const SizedBox(height: 20),
-
-                  // ✅ Password
-                  TextField(
-                    controller: _passwordController,
-                    decoration: const InputDecoration(
-                      labelText: 'Password',
-                      border: OutlineInputBorder(),
-                    ),
-                    obscureText: true,
-                  ),
-                  const SizedBox(height: 24),
-
-                  // ✅ ปุ่ม Login
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _loading ? null : _signIn,
-                      child: _loading
-                          ? CircularProgressIndicator(color: Colors.white)
-                          : const Text('Login',
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 18)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+      resizeToAvoidBottomInset: true, // ✅ ป้องกัน UI ล้นเมื่อคีย์บอร์ดขึ้น
+      backgroundColor: Colors.grey[200],
+      body: Center(
+        child: SingleChildScrollView(
+          // ✅ ป้องกัน UI ล้นแนวตั้ง
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 40),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "NINEBIBIFOOD",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 40,
+                    color: const Color.fromARGB(255, 0, 187, 255),
+                    letterSpacing: 2,
+                    shadows: [
+                      Shadow(
+                        blurRadius: 5,
+                        color: Colors.black.withOpacity(0.5),
+                        offset: Offset(2, 2),
                       ),
-                    ),
+                    ],
                   ),
-                  SizedBox(height: 20),
-
-                  // ✅ ไปหน้า Sign Up
-                  GestureDetector(
-                    onTap: () {
-                      Get.toNamed('/signUp'); // ✅ ใช้ GetX
-                    },
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                ),
+                SizedBox(height: 40),
+                FractionallySizedBox(
+                  // ✅ ทำให้กล่องกว้างขึ้น
+                  widthFactor: 0.95, // ✅ ใช้ 95% ของหน้าจอ แต่ไม่ล้น
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16), // ✅ ขอบมนขึ้น
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 8,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
-                          "Don't have an account? ",
+                          "Login",
                           style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 30,
                             color: Colors.black,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 16,
                           ),
                         ),
-                        Text(
-                          "Sign up",
-                          style: TextStyle(
-                            color: Colors.blue,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 16,
-                            decoration: TextDecoration.underline,
+                        SizedBox(height: 30),
+
+                        // ✅ Email
+                        TextField(
+                          controller: _emailController,
+                          decoration: const InputDecoration(
+                            labelText: 'Email',
+                            border: OutlineInputBorder(),
+                          ),
+                          keyboardType: TextInputType.emailAddress,
+                        ),
+                        const SizedBox(height: 20),
+
+                        // ✅ Password
+                        TextField(
+                          controller: _passwordController,
+                          decoration: const InputDecoration(
+                            labelText: 'Password',
+                            border: OutlineInputBorder(),
+                          ),
+                          obscureText: true,
+                        ),
+                        const SizedBox(height: 24),
+
+                        // ✅ ปุ่ม Login
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: _loading ? null : _signIn,
+                            child: _loading
+                                ? CircularProgressIndicator(color: Colors.white)
+                                : const Text('Login',
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 18)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue,
+                              padding: EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 20),
+
+                        // ✅ ไปหน้า Sign Up
+                        GestureDetector(
+                          onTap: () {
+                            Get.toNamed('/signUp');
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Don't have an account? ",
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Text(
+                                "Sign up",
+                                style: TextStyle(
+                                  color: Colors.blue,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 16,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 20),
+
+                        // ✅ ปุ่ม "Continue as Guest"
+                        Align(
+                          alignment: Alignment.bottomRight,
+                          child: TextButton(
+                            onPressed: () {
+                              Get.offNamed('/homenine');
+                            },
+                            child: const Text(
+                              "Continue as Guest",
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  color: Color.fromARGB(255, 100, 102, 103)),
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  SizedBox(height: 20),
-                  // ✅ ปุ่ม "Skip" ไปหน้า `Homenine`
-                  Align(
-                    alignment: Alignment.bottomRight,
-                    child: TextButton(
-                      onPressed: () {
-                        Get.offNamed('/homenine'); // ✅ ข้าม Login
-                      },
-                      child: const Text(
-                        "Continue as Guest", // ✅ เปลี่ยนจาก "Skip" เป็น "Continue as Guest"
-                        style: TextStyle(
-                            fontSize: 16,
-                            color: Color.fromARGB(255, 100, 102, 103)),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

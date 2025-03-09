@@ -96,7 +96,7 @@ class _HomenineState extends State<Homenine> {
         ),
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator()) // ✅ แสดงโหลดข้อมูล
+          ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(10.0),

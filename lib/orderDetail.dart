@@ -23,7 +23,7 @@ class _OrderdetailState extends State<Orderdetail> {
     // ✅ รับข้อมูลจาก `Get.arguments` ที่ส่งมาจาก `Menu1`
     final Map<String, dynamic> args = Get.arguments ?? {};
     orderItems = List<Map<String, dynamic>>.from(args['items'] ?? []);
-    shopName = args['shop_name'];
+    shopName = utf8.decode(args['shop_name'].toString().codeUnits);
 
     setState(() {
       _selectedDeliveryOption = args['delivery_option'] ?? 0;
@@ -203,9 +203,11 @@ class _OrderdetailState extends State<Orderdetail> {
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       //utf8.decode(markets[index]['name'].toString().codeUnits),
-                                      Text(
-                                        '${item['quantity']} x ${utf8.decode(item['name'].toString().codeUnits)}',
-                                        style: TextStyle(fontSize: 18),
+                                      Expanded(
+                                        child: Text(
+                                          '${item['quantity']} x ${utf8.decode(item['name'].toString().codeUnits)}',
+                                          style: TextStyle(fontSize: 18),
+                                        ),
                                       ),
                                       Text(
                                         '${(item['price'] as double).toStringAsFixed(2)}',
